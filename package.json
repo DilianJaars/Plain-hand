@@ -1,0 +1,21 @@
+{
+  "name": "plainhand",
+  "version": "1.0.0",
+  "description": "A free writing check for students. Marks passages that read like machine writing, explains why, and helps you declare any AI help you used.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "test": "node scripts/test.mjs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^6.4.299"
+  }
+}
