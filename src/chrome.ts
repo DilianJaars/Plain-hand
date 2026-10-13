@@ -48,8 +48,14 @@ export function mountChrome(app: HTMLElement): HTMLElement {
 }
 
 export function setActiveNav(route: Route): void {
+  const nav = document.querySelector<HTMLElement>(".nav");
   document.querySelectorAll<HTMLAnchorElement>(".nav a").forEach((a) => {
-    if (a.dataset["route"] === route) a.setAttribute("aria-current", "page");
-    else a.removeAttribute("aria-current");
+    if (a.dataset["route"] === route) {
+      a.setAttribute("aria-current", "page");
+      // On very narrow screens the menu scrolls sideways, so bring the current page into view.
+      if (nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2;
+    } else {
+      a.removeAttribute("aria-current");
+    }
   });
 }

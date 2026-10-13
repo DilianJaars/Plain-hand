@@ -4,7 +4,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const dist = join(root, "dist");
+/** "public" is the folder Vercel looks for by default, so the site deploys even without extra settings. */
+const dist = join(root, "public");
 const watch = process.argv.includes("--watch");
 
 /** Optional shared review service, e.g. REVIEWS_URL=https://reviews.example.com npm run build. Empty keeps reviews on the device. */
@@ -85,9 +86,9 @@ mkdirSync(dist, { recursive: true });
 if (watch) {
   const ctx = await context({ ...options, plugins: [{ name: "compose", setup(b) { b.onEnd(compose); } }] });
   await ctx.watch();
-  console.log("Watching src/. Open dist/index.html.");
+  console.log("Watching src/. Open public/index.html.");
 } else {
   await build(options);
   compose();
-  console.log("Built dist/index.html and dist/plainhand.single.html");
+  console.log("Built public/index.html and public/plainhand.single.html");
 }

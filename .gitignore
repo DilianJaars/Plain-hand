@@ -1,0 +1,6 @@
+node_modules
+public
+.vercel
+*.tmp
+reviews.json
+.env

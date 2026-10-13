@@ -410,3 +410,10 @@ button, input, textarea { font: inherit; color: inherit; }
 .seg-row { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
 .seg-btn { background: transparent; border: 1.5px solid var(--ink-2); border-radius: 999px; padding: 0.45rem 1rem; font-weight: 700; cursor: pointer; }
 .seg-btn[aria-checked="true"] { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+
+/* small phones: keep all six menu links on one row */
+@media (max-width: 40rem) {
+  .nav { justify-content: space-between; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { padding: 0.4rem 0.5rem; font-size: 0.86rem; }
+}

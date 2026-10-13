@@ -44,7 +44,7 @@ const HTML = `
       <li class="step">
         <span class="step-no">2</span>
         <h3>Read the marks</h3>
-        <p>Yellow means a sentence reads generic or machine-made. Every mark comes with a reason and a nudge, in plain words.</p>
+        <p>Red means a sentence reads generic or machine-made. Every mark comes with a reason and a nudge, in plain words.</p>
       </li>
       <li class="step">
         <span class="step-no">3</span>

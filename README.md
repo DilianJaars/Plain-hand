@@ -10,11 +10,11 @@ Pages: Home, Check, Declare, Guide, About, Privacy, Terms.
 npm install
 npm run typecheck   # tsc --noEmit
 npm test            # analyzer and declaration tests
-npm run build       # writes dist/
+npm run build       # writes public/
 npm run watch       # rebuilds on change
 ```
 
-Open `dist/index.html`, or upload the `dist` folder to any static host (Netlify, Cloudflare Pages, GitHub Pages, Vercel).
+Open `public/index.html`, or upload the `public` folder to any static host (Netlify, Cloudflare Pages, GitHub Pages, Vercel).
 
 ## Layout
 
@@ -30,12 +30,22 @@ src/styles.css       cream, navy and butter-yellow theme (light and dark)
 ## Security and privacy
 
 - No backend, so no database to breach and no user data in transit.
-- `dist/index.html` ships a strict Content Security Policy (no inline scripts, no network requests from the app, no framing).
+- `public/index.html` ships a strict Content Security Policy (no inline scripts, no network requests from the app, no framing).
 - All user text is escaped before it is shown. Stored data is validated when read back. Dropped files (Word, PDF, PowerPoint, OpenDocument, RTF, HTML, text) are size-limited and read in the browser, never uploaded. Scanned images are not read.
-- Fonts come from Google Fonts. To remove that third party, download the three families, serve them from `dist/`, and delete the two Google lines from the CSP in `scripts/build.mjs`.
+- Fonts come from Google Fonts. To remove that third party, download the three families, serve them from `public/`, and delete the two Google lines from the CSP in `scripts/build.mjs`.
 - If your host lets you set response headers, send the same policy as a header and add:
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, and `Strict-Transport-Security: max-age=31536000`.
 - Before launch, fill in the bracketed details in `src/pages/privacy.ts` and `src/pages/terms.ts` and have a lawyer review them.
+
+## Deploy to Vercel
+
+1. Push this folder to a GitHub repository.
+2. In Vercel choose Add New, then Project, and import the repository. The included `vercel.json` already sets the build command (`npm run build`) and output folder (`public`), so keep the defaults. `package.json` asks for Node 22 (the PDF reader needs it).
+   - `package.json` must sit at the top of the repository. If your files ended up inside a folder (for example `plainhand/`), set **Root Directory** to that folder under Settings, General.
+3. Optional: under Settings, Environment Variables, add `REVIEWS_URL` (your review service address) before the first deploy.
+4. Press Deploy.
+
+The review service in `server/` needs a host that keeps a disk and a running process (Render, Railway, Fly.io or a small VPS). It does not run on Vercel's serverless functions as written.
 
 ## Reviews
 
