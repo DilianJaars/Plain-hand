@@ -45,21 +45,25 @@ src/styles.css       cream, navy and butter-yellow theme (light and dark)
 3. Optional: under Settings, Environment Variables, add `REVIEWS_URL` (your review service address) before the first deploy.
 4. Press Deploy.
 
-The review service in `server/` needs a host that keeps a disk and a running process (Render, Railway, Fly.io or a small VPS). It does not run on Vercel's serverless functions as written.
+The review service in `server/` is separate from the site. See **Reviews** below for hosting it on Render with a free Postgres database.
 
 ## Reviews
 
 The Reviews page and the reviews on the Home page start empty. Nothing is pre-filled and no sample reviews are shipped.
 
-Without a shared service, a review is saved in the writer's own browser only and the page says so. To let every visitor see approved reviews:
+Without a shared service, a review is saved in the writer's own browser only and the page says so. To let every visitor see approved reviews, run the review service with a Postgres database so reviews are kept permanently.
 
-```
-# 1. run the review service somewhere (any Node 18+ host)
-ALLOWED_ORIGIN=https://your-site.example ADMIN_TOKEN=$(openssl rand -hex 32) node server/reviews-server.mjs
+1. **Database.** Create a free project at neon.tech (or Supabase) and copy the connection string (`postgres://...`).
+2. **Server.** On render.com choose New, then Web Service, connect this repository, and set:
+   - Build command: `npm install`
+   - Start command: `node server/reviews-server.mjs`
+   - Environment variables: `DATABASE_URL` (the connection string), `ALLOWED_ORIGIN` (your site address, for example `https://plain-hand.vercel.app`, no trailing slash), `ADMIN_TOKEN` (a long random secret, for example the output of `openssl rand -hex 32`), `TRUST_PROXY=1`
+   The service creates its table on first start.
+3. **Site.** In Vercel, Settings, Environment Variables, add `REVIEWS_URL` set to your Render address (`https://...onrender.com`), then redeploy.
 
-# 2. rebuild the site pointing at it
-REVIEWS_URL=https://reviews.your-host.example npm run build
-```
+Without `DATABASE_URL` the service falls back to a local JSON file. That is for testing only, because most hosts erase it on restart.
+
+Local test: `ALLOWED_ORIGIN=http://localhost:3000 ADMIN_TOKEN=test node server/reviews-server.mjs`
 
 New reviews are held as pending. Approve or remove them with your admin token:
 
