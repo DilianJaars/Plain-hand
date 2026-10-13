@@ -26,9 +26,9 @@ const SHELL = `
       <span class="chip" id="sample-chip">Sample essay. Replace it with yours.</span>
     </div>
 
-    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Drop a file here, or press Enter to choose one">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Drop a file here, or tap or press Enter to choose one">
       <span class="drop-icon" aria-hidden="true">+</span>
-      <span class="drop-text"><b>Drop your file here</b> or press Enter to browse. Word, PDF, PowerPoint, OpenDocument, RTF, HTML or any text file. It is read in your browser and never uploaded.</span>
+      <span class="drop-text"><b>Drop your file here</b> or tap to browse. Word, PDF, PowerPoint, OpenDocument, RTF, HTML or any text file. It is read in your browser and never uploaded.</span>
     </div>
     <p class="drop-msg" id="drop-msg" role="status"></p>
 

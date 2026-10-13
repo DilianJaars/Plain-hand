@@ -392,11 +392,12 @@ button, input, textarea { font: inherit; color: inherit; }
 @media (min-width: 62rem) { .rv-grid { grid-template-columns: minmax(0, 1fr) 24rem; gap: 3rem; } }
 
 /* dashboard */
-.dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1.5rem; align-items: start; }
+.dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr)); gap: 1.5rem; align-items: start; }
 .dash .card { margin-bottom: 0; }
 .dash .card > * + * { margin-top: 0.9rem; }
 .dash-look { grid-column: 1 / -1; }
-.time-row { display: flex; align-items: center; gap: 1.1rem; }
+.time-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.1rem; min-width: 0; }
+.dash > *, .dash .card { min-width: 0; }
 .time-big { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .sub-h { font-size: 1.05rem; letter-spacing: -0.01em; margin-top: 1.4rem; }
 .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.75rem; }
@@ -410,6 +411,14 @@ button, input, textarea { font: inherit; color: inherit; }
 .seg-row { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
 .seg-btn { background: transparent; border: 1.5px solid var(--ink-2); border-radius: 999px; padding: 0.45rem 1rem; font-weight: 700; cursor: pointer; }
 .seg-btn[aria-checked="true"] { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+
+/* touch: comfortable tap targets for the header and menu */
+@media (pointer: coarse) {
+  .brand { display: inline-flex; align-items: center; min-height: 44px; }
+  .clock { min-height: 44px; padding-inline: 0.5rem; }
+  .nav a { min-height: 40px; display: inline-flex; align-items: center; }
+  .seg-btn, .swatch { min-height: 44px; }
+}
 
 /* small phones: keep all six menu links on one row */
 @media (max-width: 40rem) {
