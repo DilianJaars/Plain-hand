@@ -108,7 +108,14 @@ export async function submitReview(name: string, rating: number, text: string, h
     });
     if (res.status === 429) return { ok: false, message: "That is a lot of reviews from one place. Please try again later." };
     if (!res.ok) return { ok: false, message: "The review could not be sent. Please try again in a moment." };
-    return { ok: true, pending: true };
+    let pending = true;
+    try {
+      const out = (await res.json()) as unknown;
+      if (isObject(out) && out["pending"] === false) pending = false;
+    } catch {
+      /* keep the safe default: treat it as waiting for a check */
+    }
+    return { ok: true, pending };
   } catch {
     return { ok: false, message: "Could not reach the review service. Check your connection and try again." };
   }

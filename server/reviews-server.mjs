@@ -6,6 +6,7 @@
 //   ADMIN_TOKEN     a long random secret that lets you approve or delete reviews (admin is off without it)
 //   DATABASE_URL    Postgres connection string. When set, reviews are stored in Postgres and survive restarts and redeploys.
 //   REVIEWS_FILE    used only when DATABASE_URL is not set: where reviews are stored (default ./reviews.json)
+//   AUTO_APPROVE    set to 1 to publish reviews immediately. Reviews with links or repeated text are still held for approval.
 //   TRUST_PROXY     set to 1 when running behind a proxy that sets X-Forwarded-For
 //
 // New reviews are held as pending. Nothing is shown publicly until you approve it.
@@ -20,6 +21,8 @@ const FILE = process.env.REVIEWS_FILE || "./reviews.json";
 const ORIGIN = process.env.ALLOWED_ORIGIN || "";
 const ADMIN = process.env.ADMIN_TOKEN || "";
 const TRUST_PROXY = process.env.TRUST_PROXY === "1";
+const AUTO_APPROVE = process.env.AUTO_APPROVE === "1";
+const LINKISH = /(https?:|www\.|\b[a-z0-9-]+\.(com|net|org|io|co|ru|xyz|info|biz|shop|top|click|link)\b|@[a-z0-9_.-]+\.[a-z]{2,})/i;
 
 const LIMITS = { nameMax: 40, textMin: 10, textMax: 600, perHour: 5, bodyMax: 4096, maxStored: 5000 };
 
@@ -45,8 +48,9 @@ async function makeStore() {
       approved: async () => (await pool.query("SELECT * FROM reviews WHERE approved ORDER BY created_at DESC LIMIT 100")).rows.map(row),
       pending: async () => (await pool.query("SELECT * FROM reviews WHERE NOT approved ORDER BY created_at ASC LIMIT 200")).rows.map(row),
       count: async () => Number((await pool.query("SELECT COUNT(*) FROM reviews")).rows[0].count),
+      hasText: async (t) => (await pool.query("SELECT 1 FROM reviews WHERE LOWER(text) = LOWER($1) LIMIT 1", [t])).rowCount > 0,
       add: async (r) => {
-        await pool.query("INSERT INTO reviews (id, name, rating, text, created_at, approved) VALUES ($1,$2,$3,$4,$5,FALSE)", [r.id, r.name, r.rating, r.text, r.createdAt]);
+        await pool.query("INSERT INTO reviews (id, name, rating, text, created_at, approved) VALUES ($1,$2,$3,$4,$5,$6)", [r.id, r.name, r.rating, r.text, r.createdAt, !!r.approved]);
       },
       approve: async (id) => (await pool.query("UPDATE reviews SET approved = TRUE WHERE id = $1", [id])).rowCount > 0,
       remove: async (id) => (await pool.query("DELETE FROM reviews WHERE id = $1", [id])).rowCount > 0,
@@ -72,8 +76,9 @@ async function makeStore() {
     approved: async () => reviews.filter((r) => r.approved).sort((a, b) => b.createdAt - a.createdAt).slice(0, 100).map(publicView),
     pending: async () => reviews.filter((r) => !r.approved).map(publicView),
     count: async () => reviews.length,
+    hasText: async (t) => reviews.some((r) => r.text.toLowerCase() === t.toLowerCase()),
     add: async (r) => {
-      reviews.push({ ...r, approved: false });
+      reviews.push({ ...r, approved: !!r.approved });
       save();
     },
     approve: async (id) => {
@@ -199,8 +204,9 @@ const server = http.createServer(async (req, res) => {
       if (text.length < LIMITS.textMin || text.length > LIMITS.textMax) return send(res, 400, { error: "text" });
       if (name.length > LIMITS.nameMax) return send(res, 400, { error: "name" });
       if ((await store.count()) >= LIMITS.maxStored) return send(res, 503, { error: "full" });
-      await store.add({ id: randomUUID(), name: name || "Anonymous", rating, text, createdAt: Date.now() });
-      return send(res, 201, { ok: true, pending: true });
+      const publish = AUTO_APPROVE && !LINKISH.test(text) && !LINKISH.test(name) && !(await store.hasText(text));
+      await store.add({ id: randomUUID(), name: name || "Anonymous", rating, text, createdAt: Date.now(), approved: publish });
+      return send(res, 201, { ok: true, pending: !publish });
     }
 
     if (path.startsWith("/admin/")) {
@@ -236,5 +242,6 @@ try {
 server.listen(PORT, () => {
   console.log("Plainhand review service on port " + PORT + " (storage: " + store.kind + ")");
   if (!ORIGIN) console.log("Warning: ALLOWED_ORIGIN is not set, so browsers on other sites cannot use this service.");
+  if (AUTO_APPROVE) console.log("Auto-approve is on: reviews without links go live immediately.");
   if (!ADMIN) console.log("Warning: ADMIN_TOKEN is not set, so reviews cannot be approved and none will be shown.");
 });

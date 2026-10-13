@@ -1,5 +1,5 @@
 import type { Mount } from "../router";
-import { EMPTY_HTML, LIMITS, cards, listReviews, removeLocalReview, submitReview, summary } from "../reviews";
+import { EMPTY_HTML, LIMITS, SHARED, cards, listReviews, removeLocalReview, submitReview, summary } from "../reviews";
 
 const HTML = `
 <section class="page">
@@ -90,7 +90,9 @@ export const mount: Mount = (root) => {
       }
       msg.textContent = r.pending
         ? "Thank you. Your review will appear once it has been checked."
-        : "Thank you. Your review is saved on this device.";
+        : SHARED
+          ? "Thank you. Your review is now live."
+          : "Thank you. Your review is saved on this device.";
       text.value = "";
       count.textContent = "0 / " + LIMITS.textMax;
       root.querySelectorAll<HTMLInputElement>('input[name="rating"]').forEach((i) => (i.checked = false));

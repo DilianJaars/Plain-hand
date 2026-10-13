@@ -65,7 +65,7 @@ Without `DATABASE_URL` the service falls back to a local JSON file. That is for 
 
 Local test: `ALLOWED_ORIGIN=http://localhost:3000 ADMIN_TOKEN=test node server/reviews-server.mjs`
 
-New reviews are held as pending. Approve or remove them with your admin token:
+Set `AUTO_APPROVE=1` on the server to publish reviews immediately. Reviews containing links, or text already posted, are still held. Without it, new reviews are held as pending. Approve or remove them with your admin token:
 
 ```
 curl -H "Authorization: Bearer $ADMIN_TOKEN" https://reviews.your-host.example/admin/pending
