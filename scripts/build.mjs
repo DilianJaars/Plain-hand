@@ -10,7 +10,7 @@ const watch = process.argv.includes("--watch");
 
 /** Optional shared review service, e.g. REVIEWS_URL=https://reviews.example.com npm run build. Empty keeps reviews on the device. */
 const DEFAULT_REVIEWS_URL = "https://plainhand-reviews.onrender.com";
-const REVIEWS_URL = (process.env.REVIEWS_URL ?? DEFAULT_REVIEWS_URL).replace(/\/+$/, "");
+const REVIEWS_URL = (process.env.REVIEWS_URL || DEFAULT_REVIEWS_URL).replace(/\/+$/, "");
 if (REVIEWS_URL && !/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(REVIEWS_URL)) throw new Error("REVIEWS_URL must be an https:// address");
 const REVIEWS_ORIGIN = REVIEWS_URL ? new URL(REVIEWS_URL).origin : "";
 
