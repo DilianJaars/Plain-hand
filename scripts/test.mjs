@@ -37,6 +37,36 @@ test("stock opener and buzzwords are marked", () => {
   assert.equal(s.level, 2);
 });
 
+test("the not-just-X-it's-Y reframe is marked", () => {
+  const a = analyze("This isn't just about cost, it's about trust between people.");
+  assert.ok(a.sentences[0].signals.includes("contrast"));
+  const b = analyze("It's not only a bridge; it's a symbol of the town.");
+  assert.ok(b.sentences[0].signals.includes("contrast"));
+});
+
+test("tacked-on -ing clauses are marked", () => {
+  const a = analyze("The council approved the plan, highlighting the need for change.");
+  assert.ok(a.sentences[0].signals.includes("tackon"));
+  const b = analyze("She was highlighting the page when the bell rang.");
+  assert.ok(!b.sentences[0].signals.includes("tackon"));
+});
+
+test("vague sources and ready-made phrases are marked", () => {
+  const a = analyze("Studies show that trees cool streets.");
+  assert.ok(a.sentences[0].signals.includes("hedge"));
+  const b = analyze("Green space plays a vital role in city life.");
+  assert.ok(b.sentences[0].signals.includes("cliche"));
+  const c = analyze("Smith (2019) measured 4 degrees of cooling under mature trees.");
+  assert.ok(!c.sentences[0].signals.includes("hedge"));
+});
+
+test("two long dashes in one sentence are marked, one is not", () => {
+  const a = analyze("The plan — which nobody read — passed on Tuesday.");
+  assert.ok(a.sentences[0].signals.includes("dashes"));
+  const b = analyze("The plan passed on Tuesday — barely.");
+  assert.ok(!b.sentences[0].signals.includes("dashes"));
+});
+
 test("a personal, specific sentence is left alone", () => {
   const a = analyze("On Tuesday my bus was 40 minutes late, so I read the chapter standing up.");
   assert.equal(a.sentences[0].level, 0);

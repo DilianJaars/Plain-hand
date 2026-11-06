@@ -37,9 +37,49 @@ export const SIGNALS: Record<SignalId, { name: string; looksFor: string; tip: st
     looksFor: "Three or more sentences in a row of almost exactly the same length.",
     tip: "Vary the length. Join two short sentences or split a long one.",
   },
+  contrast: {
+    name: "“It’s not X, it’s Y”",
+    looksFor: "Reframes like “this isn’t just about cost, it’s about trust”, a favourite of chat assistants.",
+    tip: "Skip the reframe and state what it is.",
+  },
+  tackon: {
+    name: "Tacked-on “-ing” endings",
+    looksFor: "A comma and then “highlighting”, “ensuring”, “fostering” or “underscoring” to add a grand ending.",
+    tip: "End the sentence at the fact. Say the effect in its own sentence, only if it matters.",
+  },
+  hedge: {
+    name: "Vague sources",
+    looksFor: "“Experts say”, “studies show” or “many believe” with nobody named.",
+    tip: "Name the source, or cut the claim.",
+  },
+  cliche: {
+    name: "Ready-made phrases",
+    looksFor: "Stock lines such as “plays a vital role”, “a testament to”, “paves the way” or “stands as”.",
+    tip: "Replace it with the specific thing that happened.",
+  },
+  dashes: {
+    name: "Dash-heavy sentences",
+    looksFor: "Two or more long dashes in one sentence, used to bolt on extra thoughts.",
+    tip: "Use a full stop or a comma. One dash is fine.",
+  },
 };
 
-const TIP_ORDER: SignalId[] = ["opener", "vocab", "generic", "triple", "notonly", "repeat", "rhythm"];
+const TIP_ORDER: SignalId[] = ["opener", "vocab", "cliche", "contrast", "tackon", "hedge", "generic", "triple", "notonly", "dashes", "repeat", "rhythm"];
+
+const CONTRAST_RE: RegExp[] = [
+  /\b(is|are|was|were|isn['’]t|aren['’]t|wasn['’]t|weren['’]t)(n['’]t)? (not )?(just|merely|simply|only) (about |a |an |the )?[^.;,—-]{2,60}[,;—-]\s*(it|they|this|that)['’]?(s| is| are)\b/i,
+  /\bit['’]s not (just |only |merely )?(about )?[^.;,—-]{2,60}[,;—-]\s*it['’]s\b/i,
+  /\bnot (just|merely|simply) [^.;,—-]{2,60}[,;—-]\s*(but|it|they)\b/i,
+];
+const TACKON_RE = /,\s*(highlighting|underscoring|emphasi[sz]ing|ensuring|fostering|showcasing|reflecting|demonstrating|paving the way|contributing to|enabling|allowing for|promoting|reinforcing)\b/i;
+const HEDGE_RE = /\b(experts (say|agree|believe|suggest)|studies (show|suggest|indicate|have shown)|research (shows|suggests|indicates|has shown)|many (people )?(believe|argue|say|feel)|it (can|could|may) be argued|some (argue|believe|say)|it is widely (believed|known|accepted)|it is (often|generally) (said|believed))\b/i;
+const CLICHES: string[] = [
+  "plays a (vital|crucial|key|significant|pivotal|important) role", "a testament to", "paves the way", "stands as", "serves as a",
+  "at the end of the day", "in today['’]s (fast-paced|digital|modern|ever)", "a double-edged sword",
+  "it goes without saying", "needless to say", "a deeper understanding", "in the ever", "continues to (evolve|shape)",
+  "sheds light on", "a rich tapestry", "the key takeaway", "first and foremost",
+];
+const CLICHE_RES: RegExp[] = CLICHES.map((c) => new RegExp("\\b" + c, "i"));
 
 const STOCK_OPENERS: RegExp[] = [
   /^in today['’]s\b/i,
@@ -143,6 +183,13 @@ export function analyze(text: string, sens: Sensitivity = "balanced"): Analysis 
       if (s.words >= 14 && !hasDigit && !firstPerson && !proper) {
         add(s, "generic", 1, "A general claim with no detail of your own");
       }
+
+      if (CONTRAST_RE.some((re) => re.test(t))) add(s, "contrast", 2, "A “not just X, it’s Y” reframe");
+      if (TACKON_RE.test(t)) add(s, "tackon", 1, "Ends with a tacked-on “-ing” clause");
+      if (HEDGE_RE.test(t)) add(s, "hedge", 1, "A vague source with nobody named");
+      const stock = CLICHE_RES.find((re) => re.test(t));
+      if (stock) add(s, "cliche", 1, "A ready-made phrase (“" + (t.match(stock)?.[0] ?? "").toLowerCase() + "”)");
+      if ((t.match(/—|\s–\s|\s--\s/g) ?? []).length >= 2) add(s, "dashes", 1, "Several long dashes in one sentence");
 
       if (/\b[\w-]+, [\w-]+,? and [\w-]+\b/i.test(t)) add(s, "triple", 1, "A tidy list of three");
       if (/\bnot (only|just) .+\bbut\b/i.test(t)) add(s, "notonly", 1, "A “not only … but” construction");

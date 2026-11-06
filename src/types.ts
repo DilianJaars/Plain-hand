@@ -1,4 +1,4 @@
-export type SignalId = "opener" | "vocab" | "generic" | "triple" | "notonly" | "repeat" | "rhythm";
+export type SignalId = "opener" | "vocab" | "generic" | "triple" | "notonly" | "repeat" | "rhythm" | "contrast" | "tackon" | "hedge" | "cliche" | "dashes";
 
 /** 0 = reads fine, 1 = worth a look, 2 = reads machine-like */
 export type Level = 0 | 1 | 2;
