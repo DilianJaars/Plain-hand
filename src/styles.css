@@ -426,3 +426,15 @@ button, input, textarea { font: inherit; color: inherit; }
   .nav::-webkit-scrollbar { display: none; }
   .nav a { padding: 0.4rem 0.5rem; font-size: 0.86rem; }
 }
+
+/* percentage meters */
+.meter { display: grid; gap: 0.35rem; margin-bottom: 1rem; }
+.meter-top { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
+.meter-label { font-weight: 700; }
+.meter-num { font-size: 1.9rem; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.meter-bar { height: 0.8rem; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.meter-bar i { display: block; height: 100%; border-radius: 999px; background: var(--ink); transition: width 0.3s ease; }
+.m-red .meter-num { color: var(--flag); }
+.m-red .meter-bar i { background: var(--flag); }
+.meter-note { margin: 0; font-size: 0.82rem; color: var(--ink-2); }
+@media (prefers-reduced-motion: reduce) { .meter-bar i { transition: none; } }

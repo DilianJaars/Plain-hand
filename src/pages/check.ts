@@ -203,6 +203,22 @@ export const mount: Mount = (root) => {
     );
   }
 
+  /** Share of the draft's words sitting in sentences the writer tagged as AI-assisted. */
+  function declaredPct(): number {
+    const a = state.analysis;
+    if (!a.totalWords) return 0;
+    const w = a.sentences.reduce((sum, x) => sum + (isTagged(x) ? x.words : 0), 0);
+    return Math.round((w / a.totalWords) * 100);
+  }
+
+  function meter(label: string, pct: number, cls: string, note: string): string {
+    return (
+      '<div class="meter ' + cls + '"><div class="meter-top"><span class="meter-label">' + label + '</span><b class="meter-num">' + pct + "%</b></div>" +
+      '<div class="meter-bar" role="img" aria-label="' + label + ": " + pct + ' percent"><i style="width:' + Math.max(pct, pct > 0 ? 2 : 0) + '%"></i></div>' +
+      '<p class="meter-note">' + note + "</p></div>"
+    );
+  }
+
   function reportText(): string {
     const a = state.analysis;
     const all = a.sentences.filter((s) => s.level > 0);
@@ -210,6 +226,8 @@ export const mount: Mount = (root) => {
       "Plainhand report",
       state.fileName ? "File: " + state.fileName : "Draft: pasted text",
       "Flagged: " + all.length + " of " + a.sentences.length + " sentences (" + a.flaggedPct + "% of " + a.totalWords + " words)",
+      "Reads machine-like (estimate): " + a.flaggedPct + "% of words",
+      "Tagged by the writer as AI-assisted: " + declaredPct() + "% of words",
       "Reading: " + state.sens,
       "This is a reading aid, not a detector score. It cannot say who wrote a sentence.",
       "",
@@ -249,6 +267,8 @@ export const mount: Mount = (root) => {
       panel.innerHTML =
         "<h2>Overview</h2>" +
         (state.fileName ? '<p class="file-name">' + esc(state.fileName) + "</p>" : "") +
+        meter("Reads like machine writing", a.flaggedPct, "m-red", "An estimate from writing patterns, not a detector score. It cannot tell who wrote a sentence, and real detectors will give different numbers.") +
+        meter("You tagged as AI-assisted", declaredPct(), "m-blue", state.declared.size ? "Words in the sentences you tagged. This is the figure for your declaration." : "Tag the sentences you used AI help on and this fills in. Only you know that, so it is your own count.") +
         '<dl class="facts">' +
         '<div><dt>Flagged</dt><dd class="red">' + n + " of " + a.sentences.length + "</dd></div>" +
         "<div><dt>Words in red</dt><dd>" + a.flaggedPct + "%</dd></div>" +
